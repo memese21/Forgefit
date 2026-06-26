@@ -3,20 +3,23 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>ForgeFit v4.0</title>
+<title>ForgeFit v5.0</title>
 
 <style>
 body{
   margin:0;
   font-family:system-ui;
-  background:#0b0c10;
+  background:#0a0b0e;
   color:white;
   display:flex;
   justify-content:center;
-  min-height:100vh;
 }
 
-.app{width:92%;max-width:420px;}
+.app{
+  width:92%;
+  max-width:420px;
+  padding-top:40px;
+}
 
 .screen{display:none;}
 .active{display:block;animation:fade .2s ease;}
@@ -26,31 +29,55 @@ body{
   to{opacity:1;transform:translateY(0);}
 }
 
-h1{font-size:28px;}
+/* większy UI */
+h1{font-size:34px;}
+h2{font-size:24px;}
+
+input{
+  width:100%;
+  padding:16px;
+  border-radius:14px;
+  border:none;
+  margin-top:15px;
+  text-align:center;
+  font-size:16px;
+}
 
 button{
   width:100%;
-  padding:14px;
+  padding:16px;
+  margin-top:12px;
+  border-radius:14px;
   border:none;
-  border-radius:12px;
-  margin-top:10px;
-  font-weight:600;
   background:white;
   color:black;
+  font-weight:700;
+  font-size:15px;
 }
 
 .card{
-  padding:14px;
-  margin-top:10px;
-  border-radius:12px;
-  background:rgba(255,255,255,0.05);
+  padding:18px;
+  margin-top:12px;
+  border-radius:16px;
+  background:rgba(255,255,255,0.06);
   border:1px solid rgba(255,255,255,0.08);
+  font-size:15px;
 }
 
 .top{
-  font-size:12px;
+  font-size:13px;
   opacity:.7;
-  margin-bottom:10px;
+  margin-bottom:15px;
+}
+
+/* achievements */
+.ach{
+  margin-top:12px;
+  padding:14px;
+  border-radius:14px;
+  background:rgba(255,215,0,0.08);
+  border:1px solid rgba(255,215,0,0.2);
+  font-size:14px;
 }
 </style>
 </head>
@@ -63,7 +90,7 @@ button{
 <div id="start" class="screen active">
   <h1>⚒️ ForgeFit</h1>
 
-  <input id="name" placeholder="Nick" />
+  <input id="name" placeholder="Twój nick" />
   <button onclick="start()">Start</button>
 </div>
 
@@ -76,6 +103,9 @@ button{
   <div class="card" onclick="train()">🏋️ Trening</div>
   <div class="card" onclick="diet()">🥗 Dieta</div>
 
+  <div class="ach" id="achBox">🏆 Osiągnięcia: brak</div>
+
+  <button onclick="addXP()">Symuluj trening (+XP)</button>
   <button onclick="reset()">Reset</button>
 </div>
 
@@ -83,7 +113,7 @@ button{
 <div id="train" class="screen">
   <h2>Trening</h2>
   <div id="t"></div>
-  <button onclick="addXP(30)">Zakończ trening (+30 XP)</button>
+  <button onclick="completeTrain()">Zakończ trening</button>
   <button onclick="back()">Back</button>
 </div>
 
@@ -101,6 +131,7 @@ button{
 let user="";
 let xp=0;
 let streak=1;
+let trainings=0;
 
 function show(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
@@ -110,64 +141,88 @@ function show(id){
 
 function start(){
   user=document.getElementById("name").value||"Athlete";
-
-  xp = Number(localStorage.getItem("xp")||0);
-  streak = Number(localStorage.getItem("streak")||1);
-
-  showMenu();
-}
-
-function showMenu(){
-  updateProfile();
+  load();
+  update();
   show("menu");
 }
 
-function updateProfile(){
+function load(){
+  xp=Number(localStorage.getItem("xp")||0);
+  streak=Number(localStorage.getItem("streak")||1);
+  trainings=Number(localStorage.getItem("trainings")||0);
+}
+
+function update(){
 
   let rank="Rekrut";
-
   if(xp>=100) rank="Adept";
   if(xp>=300) rank="Wojownik";
   if(xp>=600) rank="Weteran";
   if(xp>=1000) rank="LEGEND";
 
-  document.getElementById("profile").innerText =
+  document.getElementById("profile").innerText=
   `${user} | XP: ${xp} | Ranga: ${rank} | 🔥 ${streak} dni`;
+
+  updateAchievements();
+}
+
+function updateAchievements(){
+
+  let a="";
+
+  if(trainings>=1) a+="🔥 Pierwsze uderzenie\n";
+  if(trainings>=10) a+="💪 Hartowanie ciała\n";
+  if(xp>=100) a+="⚡ Adept Forge\n";
+  if(streak>=7) a+="🧠 Żelazna dyscyplina\n";
+
+  document.getElementById("achBox").innerText=
+  a || "🏆 Osiągnięcia: brak";
 }
 
 function train(){
   document.getElementById("t").innerText=
-  "Pompki 4x max\nPodciąganie 4x max\nPrzysiady 4x12";
+  "Pompki\nPodciąganie\nPrzysiady";
   show("train");
 }
 
 function diet(){
   document.getElementById("d").innerText=
-  "Jedz czysto\nBiałko\nWęgle\nWoda";
+  "Białko\nWęgle\nWoda\nWarzywa";
   show("diet");
 }
 
-function addXP(val){
-  xp+=val;
+function completeTrain(){
+  xp+=30;
   streak+=1;
-  updateProfile();
-  showMenu();
+  trainings+=1;
+  save();
+  update();
+  show("menu");
+}
+
+function addXP(){
+  xp+=10;
+  save();
+  update();
 }
 
 function back(){
-  showMenu();
+  show("menu");
 }
 
 function reset(){
   xp=0;
   streak=1;
+  trainings=0;
   save();
-  showMenu();
+  update();
+  show("menu");
 }
 
 function save(){
   localStorage.setItem("xp",xp);
   localStorage.setItem("streak",streak);
+  localStorage.setItem("trainings",trainings);
 }
 
 </script>
