@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>ForgeFit v2.0</title>
+<title>ForgeFit v3.0</title>
 
 <style>
 body{
   margin:0;
-  font-family: system-ui, Arial;
-  background:#0e0f12;
+  font-family:system-ui;
+  background:#0c0d10;
   color:white;
   display:flex;
   justify-content:center;
@@ -17,34 +17,20 @@ body{
   min-height:100vh;
 }
 
-/* container */
-.app{
-  width:92%;
-  max-width:420px;
-}
+.app{width:92%;max-width:420px;}
 
-/* screens */
-.screen{display:none; animation:fade .25s ease;}
+.screen{display:none;animation:fade .25s ease;}
 .active{display:block;}
 
 @keyframes fade{
-  from{opacity:0; transform:translateY(10px);}
-  to{opacity:1; transform:translateY(0);}
+  from{opacity:0;transform:translateY(10px);}
+  to{opacity:1;transform:translateY(0);}
 }
 
-/* header */
-h1{
-  font-size:28px;
-  letter-spacing:2px;
-  margin-bottom:5px;
-}
-.sub{
-  opacity:.6;
-  font-size:13px;
-  margin-bottom:20px;
-}
+h1{font-size:28px;letter-spacing:2px;}
 
-/* input */
+.sub{opacity:.6;font-size:13px;margin-bottom:15px;}
+
 input{
   width:100%;
   padding:14px;
@@ -55,20 +41,17 @@ input{
   margin-top:10px;
 }
 
-/* buttons */
 button{
   width:100%;
   padding:14px;
+  margin-top:10px;
   border-radius:12px;
   border:none;
-  margin-top:10px;
   background:white;
   color:black;
   font-weight:600;
-  cursor:pointer;
 }
 
-/* cards */
 .card{
   padding:14px;
   margin-top:10px;
@@ -76,28 +59,21 @@ button{
   background:rgba(255,255,255,0.05);
   border:1px solid rgba(255,255,255,0.08);
   cursor:pointer;
-  transition:.2s;
-}
-.card:hover{
-  transform:scale(1.02);
-  background:rgba(255,255,255,0.08);
 }
 
-/* top bar */
-.top{
-  font-size:12px;
-  opacity:.6;
-  margin-bottom:10px;
+.card:hover{background:rgba(255,255,255,0.1);}
+
+.top{font-size:12px;opacity:.6;margin-bottom:10px;}
+
+.menu{
+  display:grid;
+  gap:10px;
 }
 
-/* plan box */
-.plan{
-  white-space:pre-line;
-  font-size:14px;
-  line-height:1.5;
+.box{
   padding:14px;
-  background:rgba(255,255,255,0.04);
   border-radius:14px;
+  background:rgba(255,255,255,0.05);
   border:1px solid rgba(255,255,255,0.08);
 }
 </style>
@@ -110,36 +86,56 @@ button{
 <!-- START -->
 <div id="start" class="screen active">
   <h1>⚒️ ForgeFit</h1>
-  <div class="sub">Build yourself. One rep at a time.</div>
+  <div class="sub">Build yourself. No excuses.</div>
 
   <input id="name" placeholder="Twój nick" />
-
-  <button onclick="goGoal()">Start</button>
+  <button onclick="toGoal()">Start</button>
 </div>
 
 <!-- GOAL -->
 <div id="goal" class="screen">
-  <div class="top" id="userTop"></div>
+  <div class="top" id="user"></div>
 
-  <h2>Twój cel</h2>
+  <h2>Wybierz cel</h2>
 
-  <div class="card" onclick="setGoal('masa')">💪 Masa mięśniowa</div>
+  <div class="card" onclick="setGoal('masa')">💪 Masa</div>
   <div class="card" onclick="setGoal('redukcja')">🔥 Redukcja</div>
   <div class="card" onclick="setGoal('sila')">⚡ Siła</div>
   <div class="card" onclick="setGoal('kalis')">🤸 Kalistenika</div>
 
-  <button onclick="goPlan()">Generuj plan</button>
+  <button onclick="toMenu()">Dalej</button>
 </div>
 
-<!-- PLAN -->
-<div id="plan" class="screen">
-  <div class="top" id="userTop2"></div>
+<!-- MENU -->
+<div id="menu" class="screen">
+  <div class="top" id="user2"></div>
 
-  <h2>Twój plan</h2>
+  <h2>Menu</h2>
 
-  <div class="plan" id="output"></div>
+  <div class="menu">
+
+    <div class="box" onclick="showTraining()">🏋️ Trening</div>
+    <div class="box" onclick="showDiet()">🥗 Dieta</div>
+    <div class="box">📊 Plan tygodnia (soon)</div>
+    <div class="box">⚙️ Profil (soon)</div>
+
+  </div>
 
   <button onclick="restart()">Reset</button>
+</div>
+
+<!-- TRAINING -->
+<div id="training" class="screen">
+  <h2>Trening</h2>
+  <div id="plan"></div>
+  <button onclick="back()">Powrót</button>
+</div>
+
+<!-- DIET -->
+<div id="diet" class="screen">
+  <h2>Dieta</h2>
+  <div id="dietPlan"></div>
+  <button onclick="back()">Powrót</button>
 </div>
 
 </div>
@@ -154,9 +150,9 @@ function show(id){
   document.getElementById(id).classList.add("active");
 }
 
-function goGoal(){
+function toGoal(){
   user=document.getElementById("name").value||"Athlete";
-  document.getElementById("userTop").innerText="Logged as: "+user;
+  document.getElementById("user").innerText="User: "+user;
   show("goal");
 }
 
@@ -164,57 +160,61 @@ function setGoal(g){
   goal=g;
 }
 
-function goPlan(){
-  document.getElementById("userTop2").innerText="User: "+user;
+function toMenu(){
+  document.getElementById("user2").innerText="User: "+user;
+  show("menu");
+}
 
-  let plan="";
+/* TRAINING */
+function showTraining(){
+  let t="";
 
   if(goal==="masa"){
-    plan=
-`Dzień 1 - Push
-• Pompki 4x max
-• Dipy 3x max
-• Wyciskanie 4x8
-
-Dzień 2 - Pull
-• Podciąganie 4x max
-• Wiosłowanie 4x10
-
-Dzień 3 - Legs
-• Przysiady 4x12
-• Wykroki 3x10`;
+    t="Push/Pull/Legs\nPompki 4x max\nPodciąganie 4x max\nPrzysiady 4x12";
   }
 
   if(goal==="redukcja"){
-    plan=
-`Cardio + spalanie
-• Bieg 25 min
-• Pompki 3x max
-• Brzuch 4 serie
-• 8-12k kroków`;
+    t="Cardio + siła\nBieg 25 min\nPompki 3x max\nBrzuch 4 serie";
   }
 
   if(goal==="sila"){
-    plan=
-`Siła
-• Pompki wolne 5x5
-• Podciąganie 5x max
-• Dipy 4x6
-• Długie przerwy`;
+    t="Siła\nPompki 5x5\nDipy 4x6\nPodciąganie max";
   }
 
   if(goal==="kalis"){
-    plan=
-`Kalistenika
-• Handstand practice
-• Pompki 4x max
-• Core training
-• Mobility`;
+    t="Kalistenika\nHandstand\nCore\nMobilność";
   }
 
-  document.getElementById("output").innerText=plan;
+  document.getElementById("plan").innerText=t;
+  show("training");
+}
 
-  show("plan");
+/* DIET */
+function showDiet(){
+  let d="";
+
+  if(goal==="masa"){
+    d="Dieta na masę:\n+ kalorie\n+ białko\nryż, mięso, jajka";
+  }
+
+  if(goal==="redukcja"){
+    d="Dieta redukcja:\n- kalorie\nbiałko wysokie\nwarzywa + mięso";
+  }
+
+  if(goal==="sila"){
+    d="Dieta siła:\nzbilansowana\nbiałko + węgle\nregeneracja";
+  }
+
+  if(goal==="kalis"){
+    d="Dieta kalistenika:\nlekka\nbiałko\nmobilność";
+  }
+
+  document.getElementById("dietPlan").innerText=d;
+  show("diet");
+}
+
+function back(){
+  show("menu");
 }
 
 function restart(){
