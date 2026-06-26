@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>ForgeFit v5.0</title>
+<title>ForgeFit v6.0</title>
 
 <style>
 body{
   margin:0;
   font-family:system-ui;
-  background:#0a0b0e;
+  background:#0a0b0f;
   color:white;
   display:flex;
   justify-content:center;
@@ -29,9 +29,8 @@ body{
   to{opacity:1;transform:translateY(0);}
 }
 
-/* większy UI */
-h1{font-size:34px;}
-h2{font-size:24px;}
+h1{font-size:32px;}
+h2{font-size:22px;}
 
 input{
   width:100%;
@@ -40,7 +39,6 @@ input{
   border:none;
   margin-top:15px;
   text-align:center;
-  font-size:16px;
 }
 
 button{
@@ -52,32 +50,29 @@ button{
   background:white;
   color:black;
   font-weight:700;
-  font-size:15px;
 }
 
 .card{
-  padding:18px;
+  padding:16px;
   margin-top:12px;
-  border-radius:16px;
+  border-radius:14px;
   background:rgba(255,255,255,0.06);
   border:1px solid rgba(255,255,255,0.08);
-  font-size:15px;
 }
 
 .top{
   font-size:13px;
   opacity:.7;
-  margin-bottom:15px;
+  margin-bottom:12px;
 }
 
-/* achievements */
-.ach{
-  margin-top:12px;
-  padding:14px;
-  border-radius:14px;
-  background:rgba(255,215,0,0.08);
-  border:1px solid rgba(255,215,0,0.2);
-  font-size:14px;
+/* profile box */
+.profileBox{
+  padding:16px;
+  border-radius:16px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
+  margin-top:10px;
 }
 </style>
 </head>
@@ -96,16 +91,15 @@ button{
 
 <!-- MENU -->
 <div id="menu" class="screen">
-  <div class="top" id="profile"></div>
+  <div class="top" id="profileTop"></div>
 
   <h2>Menu</h2>
 
   <div class="card" onclick="train()">🏋️ Trening</div>
   <div class="card" onclick="diet()">🥗 Dieta</div>
+  <div class="card" onclick="openProfile()">👤 Profil</div>
 
-  <div class="ach" id="achBox">🏆 Osiągnięcia: brak</div>
-
-  <button onclick="addXP()">Symuluj trening (+XP)</button>
+  <button onclick="completeTrain()">+ Trening XP</button>
   <button onclick="reset()">Reset</button>
 </div>
 
@@ -113,7 +107,7 @@ button{
 <div id="train" class="screen">
   <h2>Trening</h2>
   <div id="t"></div>
-  <button onclick="completeTrain()">Zakończ trening</button>
+  <button onclick="completeTrain()">Zakończ</button>
   <button onclick="back()">Back</button>
 </div>
 
@@ -121,6 +115,15 @@ button{
 <div id="diet" class="screen">
   <h2>Dieta</h2>
   <div id="d"></div>
+  <button onclick="back()">Back</button>
+</div>
+
+<!-- PROFILE -->
+<div id="profile" class="screen">
+  <h2>Profil</h2>
+
+  <div class="profileBox" id="profileBox"></div>
+
   <button onclick="back()">Back</button>
 </div>
 
@@ -152,31 +155,19 @@ function load(){
   trainings=Number(localStorage.getItem("trainings")||0);
 }
 
-function update(){
-
-  let rank="Rekrut";
-  if(xp>=100) rank="Adept";
-  if(xp>=300) rank="Wojownik";
-  if(xp>=600) rank="Weteran";
-  if(xp>=1000) rank="LEGEND";
-
-  document.getElementById("profile").innerText=
-  `${user} | XP: ${xp} | Ranga: ${rank} | 🔥 ${streak} dni`;
-
-  updateAchievements();
+function level(){
+  if(xp>=1000) return 5;
+  if(xp>=500) return 4;
+  if(xp>=250) return 3;
+  if(xp>=100) return 2;
+  return 1;
 }
 
-function updateAchievements(){
+function update(){
 
-  let a="";
+  document.getElementById("profileTop").innerText=
+  `${user} | XP: ${xp} | Level: ${level()} | 🔥 ${streak}`;
 
-  if(trainings>=1) a+="🔥 Pierwsze uderzenie\n";
-  if(trainings>=10) a+="💪 Hartowanie ciała\n";
-  if(xp>=100) a+="⚡ Adept Forge\n";
-  if(streak>=7) a+="🧠 Żelazna dyscyplina\n";
-
-  document.getElementById("achBox").innerText=
-  a || "🏆 Osiągnięcia: brak";
 }
 
 function train(){
@@ -187,8 +178,22 @@ function train(){
 
 function diet(){
   document.getElementById("d").innerText=
-  "Białko\nWęgle\nWoda\nWarzywa";
+  "Białko\nWęgle\nWarzywa";
   show("diet");
+}
+
+function openProfile(){
+
+  document.getElementById("profileBox").innerText=
+`
+Nick: ${user}
+XP: ${xp}
+Level: ${level()}
+Treningi: ${trainings}
+Streak: ${streak}
+`;
+
+  show("profile");
 }
 
 function completeTrain(){
@@ -198,12 +203,6 @@ function completeTrain(){
   save();
   update();
   show("menu");
-}
-
-function addXP(){
-  xp+=10;
-  save();
-  update();
 }
 
 function back(){
