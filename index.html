@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>ForgeFit</title>
+<title>ForgeFit v1.0</title>
 
 <style>
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background: #0b0b0b;
+  background: radial-gradient(circle at top, #151515, #070707);
   color: white;
   display: flex;
   justify-content: center;
@@ -17,21 +17,50 @@ body {
   min-height: 100vh;
 }
 
+/* layout */
 .screen {
   display: none;
   width: 90%;
   max-width: 420px;
   text-align: center;
+  animation: fade 0.4s ease;
 }
 
 .active {
   display: block;
 }
 
-h1 {
-  letter-spacing: 3px;
+/* animations */
+@keyframes fade {
+  from {opacity:0; transform: translateY(10px);}
+  to {opacity:1; transform: translateY(0);}
 }
 
+/* typography */
+h1 {
+  font-size: 32px;
+  letter-spacing: 3px;
+  margin-bottom: 5px;
+}
+
+.subtitle {
+  opacity: 0.6;
+  font-size: 13px;
+  margin-bottom: 20px;
+}
+
+/* input */
+input {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  margin-top: 10px;
+  text-align: center;
+  outline: none;
+}
+
+/* buttons */
 button {
   width: 100%;
   padding: 14px;
@@ -42,17 +71,14 @@ button {
   color: black;
   font-weight: bold;
   cursor: pointer;
+  transition: 0.2s;
 }
 
-input {
-  width: 100%;
-  padding: 14px;
-  border-radius: 12px;
-  border: none;
-  margin-top: 10px;
-  text-align: center;
+button:active {
+  transform: scale(0.97);
 }
 
+/* tiles */
 .tile {
   padding: 14px;
   margin-top: 10px;
@@ -60,69 +86,85 @@ input {
   background: rgba(255,255,255,0.05);
   border: 1px solid rgba(255,255,255,0.1);
   cursor: pointer;
+  transition: 0.2s;
 }
 
 .tile:hover {
   background: rgba(255,255,255,0.1);
+}
+
+/* header bar */
+.topbar {
+  font-size: 12px;
+  opacity: 0.6;
+  margin-bottom: 10px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- 1. START -->
+<!-- START -->
 <div id="start" class="screen active">
-  <h1>FORGEFIT ⚒️</h1>
-  <p>Każdy mistrz był kiedyś początkującym.</p>
+  <h1>⚒️ FORGEFIT</h1>
+  <div class="subtitle">Każdy mistrz był kiedyś początkującym</div>
 
   <input id="name" placeholder="Wpisz nick lub imię" />
 
-  <button onclick="nextScreen('goal')">
-    Rozpocznij
-  </button>
+  <button onclick="go('goal')">Rozpocznij</button>
 </div>
 
-<!-- 2. CEL -->
+<!-- GOAL -->
 <div id="goal" class="screen">
+  <div class="topbar" id="userLabel"></div>
+
   <h2>Jaki masz cel?</h2>
 
-  <div class="tile" onclick="selectGoal('masa')">💪 Masa mięśniowa</div>
-  <div class="tile" onclick="selectGoal('redukcja')">🔥 Redukcja</div>
-  <div class="tile" onclick="selectGoal('sila')">⚡ Siła</div>
-  <div class="tile" onclick="selectGoal('kalis')">🤸 Kalistenika</div>
+  <div class="tile" onclick="setGoal('masa')">💪 Masa mięśniowa</div>
+  <div class="tile" onclick="setGoal('redukcja')">🔥 Redukcja</div>
+  <div class="tile" onclick="setGoal('sila')">⚡ Siła</div>
+  <div class="tile" onclick="setGoal('kalis')">🤸 Kalistenika</div>
 
-  <button onclick="nextScreen('plan')">
-    Dalej
-  </button>
+  <button onclick="go('plan')">Dalej</button>
 </div>
 
-<!-- 3. PLAN (na razie placeholder) -->
+<!-- PLAN -->
 <div id="plan" class="screen">
+  <div class="topbar" id="userLabel2"></div>
+
   <h2>Twój plan ⚒️</h2>
 
-  <p id="output">Wybierz cel aby wygenerować plan...</p>
+  <div id="output"></div>
 
-  <button onclick="goHome()">Powrót</button>
+  <button onclick="go('start')">Restart</button>
 </div>
 
 <script>
-let userName = "";
+
+let user = "";
 let goal = "";
 
-function nextScreen(id) {
+function go(screen) {
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
+  document.getElementById(screen).classList.add("active");
 
-  if (id === "goal") {
-    userName = document.getElementById("name").value || "Athlete";
+  if (screen === "goal") {
+    user = document.getElementById("name").value || "Athlete";
+
+    document.getElementById("userLabel").innerText =
+      "⚒️ Witaj " + user;
+
   }
 
-  if (id === "plan") {
+  if (screen === "plan") {
+    document.getElementById("userLabel2").innerText =
+      "⚒️ " + user;
+
     generatePlan();
   }
 }
 
-function selectGoal(g) {
+function setGoal(g) {
   goal = g;
 }
 
@@ -130,28 +172,57 @@ function generatePlan() {
   let plan = "";
 
   if (goal === "masa") {
-    plan = "Dzień 1: klatka + triceps\nPompki 4x max\nWyciskanie 4x8\nDipy 3x max";
+    plan = `
+Dzień 1: Klatka + triceps
+- Pompki 4x max
+- Dipy 3x max
+- Wyciskanie 4x8
+
+Dzień 2: Plecy
+- Podciąganie 4x max
+- Wiosłowanie 4x10
+- Core 3x
+
+Dzień 3: Nogi
+- Przysiady 4x12
+- Wykroki 3x10
+- Brzuch 3x
+`;
   }
 
   if (goal === "redukcja") {
-    plan = "Cardio 20-30 min\nPompki 3x max\nBrzuch 4 serie\nSpacer 10k kroków";
+    plan = `
+Cardio + spalanie
+- Bieg 20-30 min
+- Pompki 3x max
+- Brzuch 4 serie
+- 8-12k kroków dziennie
+`;
   }
 
   if (goal === "sila") {
-    plan = "Pompki wolne 5x5\nDipy 4x6\nPodciąganie 4x max\nPrzerwy 2-3 min";
+    plan = `
+Siła
+- Pompki wolne 5x5
+- Podciąganie 5x max
+- Dipy 4x6
+- Przerwy 2-3 min
+`;
   }
 
   if (goal === "kalis") {
-    plan = "Handstand practice\nPompki 4x max\nCore training\nMobilność";
+    plan = `
+Kalistenika
+- Handstand practice
+- Pompki 4x max
+- Core training
+- Mobilność
+`;
   }
 
-  document.getElementById("output").innerText =
-    userName + "\n\n" + plan;
+  document.getElementById("output").innerText = plan;
 }
 
-function goHome() {
-  nextScreen("start");
-}
 </script>
 
 </body>
