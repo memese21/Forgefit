@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>ForgeFit v8.0</title>
+<title>ForgeFit v12.0</title>
 
 <style>
 body{
   margin:0;
   font-family:system-ui;
-  background:#08090c;
+  background:#07080b;
   color:white;
   display:flex;
   justify-content:center;
@@ -60,22 +60,18 @@ button{
   border:1px solid rgba(255,255,255,0.08);
 }
 
-.premium{
-  opacity:.35;
-  border:1px dashed rgba(255,255,255,0.25);
+.leader{
+  padding:14px;
+  border-radius:14px;
+  background:rgba(0,255,150,0.08);
+  border:1px solid rgba(0,255,150,0.2);
+  margin-top:10px;
 }
 
 .top{
   font-size:13px;
   opacity:.7;
   margin-bottom:12px;
-}
-
-.profileBox{
-  padding:16px;
-  border-radius:14px;
-  background:rgba(255,255,255,0.05);
-  border:1px solid rgba(255,255,255,0.08);
 }
 </style>
 </head>
@@ -95,46 +91,19 @@ button{
 <div id="menu" class="screen">
   <div class="top" id="top"></div>
 
-  <h2>Menu</h2>
+  <h2>Leaderboard</h2>
 
-  <div class="card" onclick="train()">🏋️ Trening</div>
-  <div class="card" onclick="diet()">🥗 Dieta</div>
-  <div class="card" onclick="daily()">📅 Daily Quest</div>
-  <div class="card premium">💎 Premium (soon)</div>
-  <div class="card" onclick="profile()">👤 Profil</div>
+  <div class="leader" id="board"></div>
 
-  <button onclick="completeTrain()">+ XP</button>
+  <button onclick="train()">Trening</button>
 </div>
 
 <!-- TRAIN -->
 <div id="train" class="screen">
   <h2>Trening</h2>
-  <div id="t"></div>
-  <button onclick="completeTrain()">Zakończ</button>
-  <button onclick="back()">Back</button>
-</div>
+  <div class="card">Pompki / Pull / Legs</div>
 
-<!-- DIET -->
-<div id="diet" class="screen">
-  <h2>Dieta</h2>
-  <div id="d"></div>
-  <button onclick="back()">Back</button>
-</div>
-
-<!-- DAILY -->
-<div id="daily" class="screen">
-  <h2>Daily Quest</h2>
-  <div class="card" id="quest"></div>
-  <button onclick="completeDaily()">Wykonane</button>
-  <button onclick="back()">Back</button>
-</div>
-
-<!-- PROFILE -->
-<div id="profile" class="screen">
-  <h2>Profil</h2>
-
-  <div class="profileBox" id="pbox"></div>
-
+  <button onclick="complete()">Zakończ trening</button>
   <button onclick="back()">Back</button>
 </div>
 
@@ -145,108 +114,58 @@ button{
 let user="";
 let xp=0;
 let streak=1;
-let trainings=0;
-let dailyDone=0;
+
+let fakeUsers=[
+  {name:"Alex",xp:820},
+  {name:"Mike",xp:540}
+];
 
 function show(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
-  save();
 }
 
 function start(){
-  user=document.getElementById("name").value||"Athlete";
+  user=document.getElementById("name").value||"You";
   load();
   update();
   show("menu");
-  generateQuest();
 }
 
-function load(){
-  xp=Number(localStorage.getItem("xp")||0);
-  streak=Number(localStorage.getItem("streak")||1);
-  trainings=Number(localStorage.getItem("trainings")||0);
-  dailyDone=Number(localStorage.getItem("daily")||0);
-}
+function leaderboard(){
 
-function level(){
-  if(xp>=1000) return 5;
-  if(xp>=500) return 4;
-  if(xp>=250) return 3;
-  if(xp>=100) return 2;
-  return 1;
+  let all=[...fakeUsers,{name:user,xp:xp}];
+
+  all.sort((a,b)=>b.xp-a.xp);
+
+  let text="";
+
+  all.forEach((u,i)=>{
+    let tag = u.name===user ? "👤 YOU" : "";
+    text+=`${i+1}. ${u.name} - ${u.xp} XP ${tag}\n`;
+  });
+
+  document.getElementById("board").innerText=text;
+
 }
 
 function update(){
   document.getElementById("top").innerText=
-  `${user} | XP: ${xp} | Level: ${level()} | 🔥 ${streak}`;
+  `${user} | XP: ${xp} | 🔥 ${streak}`;
+
+  leaderboard();
 }
 
-/* TRAIN */
 function train(){
-  document.getElementById("t").innerText=
-  "Pompki\nPodciąganie\nPrzysiady";
   show("train");
 }
 
-function diet(){
-  document.getElementById("d").innerText=
-  "Białko\nWęgle\nWarzywa";
-  show("diet");
-}
-
-/* DAILY */
-let quest="";
-function generateQuest(){
-  let q=[
-    "🔥 50 pompek",
-    "🏃 15 min cardio",
-    "🤸 mobilność",
-    "🧠 core"
-  ];
-  quest=q[Math.floor(Math.random()*q.length)];
-  document.getElementById("quest").innerText=quest;
-}
-
-function daily(){
-  generateQuest();
-  show("daily");
-}
-
-function completeDaily(){
-  xp+=50;
+function complete(){
+  xp+=40;
   streak+=1;
-  dailyDone+=1;
-  save();
+
   update();
-  show("menu");
-}
 
-/* PROFILE */
-function profile(){
-
-  let status = streak>0 ? "ACTIVE 🔥" : "INACTIVE";
-
-  document.getElementById("pbox").innerText=
-`
-Nick: ${user}
-XP: ${xp}
-Level: ${level()}
-Treningi: ${trainings}
-Daily done: ${dailyDone}
-Status: ${status}
-`;
-
-  show("profile");
-}
-
-/* XP */
-function completeTrain(){
-  xp+=30;
-  streak+=1;
-  trainings+=1;
-  save();
-  update();
   show("menu");
 }
 
@@ -254,11 +173,9 @@ function back(){
   show("menu");
 }
 
-function save(){
-  localStorage.setItem("xp",xp);
-  localStorage.setItem("streak",streak);
-  localStorage.setItem("trainings",trainings);
-  localStorage.setItem("daily",dailyDone);
+function load(){
+  xp=Number(localStorage.getItem("xp")||0);
+  streak=Number(localStorage.getItem("streak")||1);
 }
 
 </script>
